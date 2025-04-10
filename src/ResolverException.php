@@ -21,7 +21,7 @@ class ResolverException extends \RuntimeException
         return $self;
     }
 
-    public static function createForParametrType(\ReflectionParameter $parameter, mixed $entry): ResolverException
+    public static function createForParameterType(\ReflectionParameter $parameter, mixed $entry): ResolverException
     {
         $self = new self('Argument #'.$parameter->getPosition().' ($'.$parameter->getName().') must be of type ' . $parameter->getType() . ', given ' . Type::gettype($entry, Type::objectAsClass));
         $self->line = $parameter->getDeclaringFunction()->getStartLine();
