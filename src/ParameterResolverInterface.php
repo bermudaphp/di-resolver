@@ -2,8 +2,6 @@
 
 namespace Bermuda\ParameterResolver\Resolver;
 
-use Psr\Http\Message\ServerRequestInterface;
-
 interface ParameterResolverInterface
 {
     /**
