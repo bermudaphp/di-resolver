@@ -2,9 +2,9 @@
 
 namespace Bermuda\ParameterResolver\Resolver;
 
-use Psr\Container\ContainerInterface;
 use ReflectionParameter;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Container\ContainerInterface;
+
 use function Bermuda\Config\conf;
 
 final class ParameterResolver
