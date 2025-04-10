@@ -1,10 +1,10 @@
 <?php
 
-namespace Bermuda\Reflection\Resolver;
+namespace Bermuda\ParameterResolver\Resolver;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-interface ParametrResolverInterface
+interface ParameterResolverInterface
 {
     public function resolve(\ReflectionParameter $parameter, array $params):? array ;
 }
