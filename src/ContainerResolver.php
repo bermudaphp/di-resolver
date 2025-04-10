@@ -83,4 +83,9 @@ final class ContainerResolver implements ParameterResolverInterface
 
         return [$parameter->getName(), $entry];
     }
+
+    public static function createFromContainer(ContainerInterface $container): ContainerResolver
+    {
+        return new self($container);
+    }
 }
