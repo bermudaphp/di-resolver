@@ -1,11 +1,11 @@
 <?php
 
-namespace Bermuda\Reflection\Resolver;
+namespace Bermuda\ParameterResolver\Resolver;
 
 use ReflectionParameter;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class ParametrResolver implements ParametrResolverInterface
+final class ParameterResolver implements ParametrResolverInterface
 {
     /**
      * @var ParametrResolverInterface[]
@@ -17,7 +17,7 @@ final class ParametrResolver implements ParametrResolverInterface
         foreach ($resolvers as $resolver) $this->addResolver($resolver);
     }
 
-    public function addResolver(ParametrResolverInterface $resolver): void
+    public function addResolver(ParameterResolverInterface $resolver): void
     {
         $this->resolvers[] = $resolver;
     }
