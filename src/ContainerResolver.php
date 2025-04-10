@@ -7,7 +7,6 @@ use Bermuda\Reflection\TypeMatcher;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Bermuda\ParameterResolver\Attribute\Config;
 use Bermuda\ParameterResolver\Attribute\Container;
 
