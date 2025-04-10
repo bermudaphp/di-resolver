@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\ParameterResolver\Attribute;
+namespace Bermuda\Di\Attribute;
 
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
