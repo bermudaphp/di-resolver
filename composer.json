@@ -1,0 +1,16 @@
+{
+  "name": "bermudaphp/di-resolver",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Bermuda\\ParameterResolver\\": "src/",
+      "Bermuda\\ParameterResolver\\Attribute\\": "src/attribute/"
+    }
+  },
+  "require": {
+    "php": "^8.4",
+    "bermudaphp/config": "^1.4",
+    "bermudaphp/checktype": "^1.0.2",
+    "psr/container": "^1.0 || 2.0.2"
+  }
+}
