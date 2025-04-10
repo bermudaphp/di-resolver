@@ -2,8 +2,10 @@
 
 namespace Bermuda\ParameterResolver\Resolver;
 
+use Psr\Container\ContainerInterface;
 use ReflectionParameter;
 use Psr\Http\Message\ServerRequestInterface;
+use function Bermuda\Config\conf;
 
 final class ParameterResolver implements ParameterResolverInterface
 {
@@ -17,9 +19,9 @@ final class ParameterResolver implements ParameterResolverInterface
         foreach ($resolvers as $resolver) $this->addResolver($resolver);
     }
 
-    public function addResolver(ParameterResolverInterface $resolver): void
+    public function addResolver(ParameterResolverInterface $resolver, bool $prepend = false): void
     {
-        $this->resolvers[] = $resolver;
+        $prepend ? array_unshift($this->resolvers, $resolver) : $this->resolvers[] = $resolver;
     }
 
     /**
@@ -43,5 +45,17 @@ final class ParameterResolver implements ParameterResolverInterface
         if ($parameter->allowsNull()) return [$parameter->getName(), null];
 
         throw ResolverException::createFromParameter($parameter);
+    }
+
+    public static function createFromContainer(ContainerInterface $container): self
+    {
+        $resolver = new self();
+        foreach (conf($container)->get(ConfigProvider::CONFIG_KEY_RESOLVERS, []) as $resolver) {
+            $resolver->resolve($container->get($resolver));
+        }
+
+        $resolver->resolve(new ContainerResolver($container));
+
+        return $resolver;
     }
 }
