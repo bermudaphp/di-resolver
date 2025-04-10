@@ -7,8 +7,8 @@ use Bermuda\Reflection\TypeMatcher;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Bermuda\ParameterResolver\Attribute\Config;
-use Bermuda\ParameterResolver\Attribute\Container;
+use Bermuda\Di\Attribute\Config;
+use Bermuda\Di\Attribute\Container;
 
 final class ContainerResolver implements ParameterResolverInterface
 {
