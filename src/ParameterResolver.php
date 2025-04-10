@@ -9,7 +9,7 @@ use function Bermuda\Config\conf;
 
 final class ParameterResolver
 {
-    public readonly ResolverCollector $resolvers;
+    private(set) ResolverCollector $resolvers;
 
     public function __construct(iterable $resolvers = [])
     {
@@ -26,7 +26,7 @@ final class ParameterResolver
     public function resolve(array $parameters, array $params = []): array
     {
         $resolved = [];
-        foreach ($this->parameters as $parameter) {
+        foreach ($parameters as $parameter) {
             $pair = $this->resolveParameter($parameter, $params);
             if ($pair) $resolved[$pair[0]] = $pair[1];
         }
