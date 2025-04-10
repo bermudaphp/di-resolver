@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\ParameterResolver\Resolver;
+namespace Bermuda\ParameterResolver;
 
 use Bermuda\CheckType\Type;
 use ReflectionParameter;

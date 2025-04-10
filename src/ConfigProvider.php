@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\ParameterResolver\Resolver;
+namespace Bermuda\ParameterResolver;
 
 class ConfigProvider extends \Bermuda\Config\ConfigProvider
 {
