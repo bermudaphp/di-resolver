@@ -6,5 +6,5 @@ use Psr\Http\Message\ServerRequestInterface;
 
 interface ParameterResolverInterface
 {
-    public function resolve(\ReflectionParameter $parameter, array $params):? array ;
+    public function resolve(\ReflectionParameter $parameter, array $params = []):? array ;
 }
