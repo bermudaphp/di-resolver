@@ -5,7 +5,7 @@ namespace Bermuda\ParameterResolver\Resolver;
 use ReflectionParameter;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class ParameterResolver implements ParametrResolverInterface
+final class ParameterResolver implements ParameterResolverInterface
 {
     /**
      * @var ParametrResolverInterface[]
