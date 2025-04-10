@@ -2,8 +2,9 @@
 
 namespace Bermuda\ParameterResolver;
 
-use Psr\Container\ContainerInterface;
 use Traversable;
+use Psr\Container\ContainerInterface;
+
 use function Bermuda\Config\conf;
 
 final class ResolverCollector implements \IteratorAggregate
@@ -66,14 +67,14 @@ final class ResolverCollector implements \IteratorAggregate
         yield from $this->resolvers;
     }
 
-    private function addResolver(ParameterResolverInterface $resolver, bool $prepend): void
+    private function addResolver(ParameterResolverInterface $resolver, bool $prepend = false): void
     {
         $prepend ? array_unshift($this->resolvers, $resolver) : $this->resolvers[] = $resolver;
     }
 
     public static function createFromContainer(ContainerInterface $container): self
     {
-        $self = new self();
+        $self = new self([]);
         foreach (conf($container)->get(ConfigProvider::CONFIG_KEY_RESOLVERS, []) as $resolver) {
             $self->addResolver($container->get($resolver));
         }
