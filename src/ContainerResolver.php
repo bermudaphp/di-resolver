@@ -60,6 +60,19 @@ final class ContainerResolver implements ParameterResolverInterface
             return $this->resolveFromContainer($parameter, $parameter->getName());
         }
 
+        $type = $parameter->getType();
+
+        if ($type instanceof \ReflectionUnionType) {
+            foreach ($type->getTypes() as $type) {
+                if ($type instanceof \ReflectionNamedType) goto named;
+            }
+        }
+
+        if ($type instanceof \ReflectionNamedType) {
+            named:
+            if ($this->container->has($type->getName())) return $this->resolveFromContainer($parameter, $type->getName());
+        }
+
         return null;
     }
 
