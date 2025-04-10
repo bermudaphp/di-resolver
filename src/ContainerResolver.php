@@ -2,14 +2,14 @@
 
 namespace Bermuda\ParameterResolver\Resolver;
 
-use Bermuda\ParametrResolver\Attribute\Config;
-use Bermuda\ParametrResolver\Attribute\Container;
+use ReflectionParameter;
 use Bermuda\Reflection\TypeMatcher;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use ReflectionParameter;
+use Bermuda\ParameterResolver\Attribute\Config;
+use Bermuda\ParameterResolver\Attribute\Container;
 
 final class ContainerResolver implements ParameterResolverInterface
 {
