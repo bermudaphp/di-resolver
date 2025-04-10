@@ -4,7 +4,7 @@
   "autoload": {
     "psr-4": {
       "Bermuda\\ParameterResolver\\": "src/",
-      "Bermuda\\ParameterResolver\\Attribute\\": "src/attribute/"
+      "Bermuda\\Di\\Attribute\\": "src/attribute/"
     }
   },
   "require": {
