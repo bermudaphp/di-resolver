@@ -18,6 +18,9 @@ final class ContainerResolver implements ParameterResolverInterface
     ) {
     }
 
+    /**
+     * @inheritDoc
+     */
     public function resolve(ReflectionParameter $parameter, array $params = []):? array
     {
         $config = $this->getAttribute($parameter, Config::class);
@@ -26,7 +29,12 @@ final class ContainerResolver implements ParameterResolverInterface
             $configInstance = $config->newInstance();
 
             $path = $configInstance->path;
-            $config = $this->container->get($configInstance->configKey);
+
+            try {
+                $config = $this->container->get($configInstance->configKey);
+            } catch (ContainerExceptionInterface $prev) {
+                ResolverException::createFromPrev($prev);
+            }
 
             if (is_array($path)) {
                 $entry = $config[$segment = array_shift($path)] ?? null;
@@ -66,7 +74,7 @@ final class ContainerResolver implements ParameterResolverInterface
         if ($parameter->getType() !== null) {
             $matcher = new TypeMatcher();
             if (!$matcher->match($parameter->getType(), $entry)) {
-                throw ResolverException::createForParametrType($parameter, $entry);
+                throw ResolverException::createForParameterType($parameter, $entry);
             }
         }
     }
