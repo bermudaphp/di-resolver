@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\ParametrResolver\Resolver;
+namespace Bermuda\ParameterResolver\Resolver;
 
 use Bermuda\ParametrResolver\Attribute\Config;
 use Bermuda\ParametrResolver\Attribute\Container;
@@ -11,7 +11,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionParameter;
 
-final class ContainerResolver implements ParametrResolverInterface
+final class ContainerResolver implements ParameterResolverInterface
 {
     public function __construct(
         private ContainerInterface $container
