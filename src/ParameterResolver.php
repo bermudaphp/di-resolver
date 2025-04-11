@@ -18,7 +18,7 @@ final class ParameterResolver
 
     /**
      * @param \ReflectionParameter[] $parameters
-     * @param array<string, $params> $params
+     * @param array<string, mixed> $params
      *  The method returns an array of function parameters,
      *  where the keys will be the names of parameters
      * @return array<string, mixed>
@@ -36,8 +36,8 @@ final class ParameterResolver
 
     /**
      * @param \ReflectionParameter[] $parameters
-     * @param array<string, $params> $params
-     *  The method returns an array of function parameters, 
+     * @param array<string, mixed> $params
+     *  The method returns an array of function parameters,
      *  where the keys will be the position of the parameter
      * @return array<int, mixed>
      */
