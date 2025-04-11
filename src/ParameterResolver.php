@@ -17,7 +17,7 @@ final class ParameterResolver
     }
 
     /**
-     * @param \ReflectionParameter $parameters
+     * @param \ReflectionParameter[] $parameters
      * @param array<string, $params> $params
      *  The method returns an array of function parameters,
      *  where the keys will be the names of parameters
@@ -29,6 +29,24 @@ final class ParameterResolver
         foreach ($parameters as $parameter) {
             $pair = $this->resolveParameter($parameter, $params);
             if ($pair) $resolved[$pair[0]] = $pair[1];
+        }
+
+        return $resolved;
+    }
+
+    /**
+     * @param \ReflectionParameter[] $parameters
+     * @param array<string, $params> $params
+     *  The method returns an array of function parameters, 
+     *  where the keys will be the position of the parameter
+     * @return array<int, mixed>
+     */
+    public function resolvePositionedParameters(array $parameters, array $params = []): array
+    {
+        $resolved = [];
+        foreach ($parameters as $parameter) {
+            $pair = $this->resolveParameter($parameter, $params);
+            if ($pair) $resolved[$parameter->getPosition()] = $pair[1];
         }
 
         return $resolved;
