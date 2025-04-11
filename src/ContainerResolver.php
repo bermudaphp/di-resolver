@@ -3,7 +3,6 @@
 namespace Bermuda\ParameterResolver;
 
 use ReflectionParameter;
-use Bermuda\Reflection\TypeMatcher;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -44,9 +43,7 @@ final class ContainerResolver implements ParameterResolverInterface
                     $entry = $entry[$key];
                 }
             } else $entry = $config[$path];
-
-            if (!$this->checkParamType($parameter, $entry)) return null;
-
+            
             return [$parameter->getName(), $entry];
         }
 
@@ -78,7 +75,7 @@ final class ContainerResolver implements ParameterResolverInterface
                     return null;
                 }
 
-                if ($this->checkParamType($parameter, $entry)) return [$parameter->getName(), $entry];
+                return [$parameter->getName(), $entry];
             }
         }
 
@@ -89,19 +86,7 @@ final class ContainerResolver implements ParameterResolverInterface
     {
         return $parameter->getAttributes($cls)[0] ?? null;
     }
-
-    private function checkParamType(ReflectionParameter $parameter, mixed $entry): bool
-    {
-        static $matcher = new TypeMatcher;
-        if ($parameter->getType() !== null) {
-            if (!$matcher->match($parameter->getType(), $entry)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
+    
     public static function createFromContainer(ContainerInterface $container): ContainerResolver
     {
         return new self($container);
