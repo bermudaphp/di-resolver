@@ -32,7 +32,7 @@ final class ContainerResolver implements ParameterResolverInterface
             try {
                 $config = $this->container->get($configInstance->configKey);
             } catch (ContainerExceptionInterface $prev) {
-                ResolverException::createFromPrev($prev);
+                return null;
             }
 
             if (is_array($path)) {
@@ -75,12 +75,10 @@ final class ContainerResolver implements ParameterResolverInterface
                 try {
                     $entry = $this->container->get($id);
                 } catch (ContainerExceptionInterface $e) {
-                    throw ResolverException::createFromPrev($e);
+                    return null;
                 }
 
-                $this->checkParamType($parameter, $entry);
-
-                return [$parameter->getName(), $entry];
+                if ($this->checkParamType($parameter, $entry)) return [$parameter->getName(), $entry];
             }
         }
 
@@ -92,16 +90,18 @@ final class ContainerResolver implements ParameterResolverInterface
         return $parameter->getAttributes($cls)[0] ?? null;
     }
 
-    private function checkParamType(ReflectionParameter $parameter, mixed $entry)
+    private function checkParamType(ReflectionParameter $parameter, mixed $entry): bool
     {
+        static $matcher = new TypeMatcher;
         if ($parameter->getType() !== null) {
-            $matcher = new TypeMatcher();
             if (!$matcher->match($parameter->getType(), $entry)) {
-                throw ResolverException::createForParameterType($parameter, $entry);
+                return false;
             }
         }
+        
+        return true;
     }
-    
+
     public static function createFromContainer(ContainerInterface $container): ContainerResolver
     {
         return new self($container);
