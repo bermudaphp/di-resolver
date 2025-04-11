@@ -21,36 +21,36 @@ final class ContainerResolver implements ParameterResolverInterface
      */
     public function resolve(ReflectionParameter $parameter, array $params = []):? array
     {
-        $config = $this->getAttribute($parameter, Config::class);
+        $attribute = $this->getAttribute($parameter, Config::class);
 
-        if ($config) {
-            $configInstance = $config->newInstance();
+        if ($attribute) {
+            $configInstance = $attribute->newInstance();
 
             $path = $configInstance->path;
 
             try {
-                $config = $this->container->get($configInstance->configKey);
+                $attribute = $this->container->get($configInstance->configKey);
             } catch (ContainerExceptionInterface) {
                 return null;
             }
 
             if (is_array($path)) {
-                $entry = $config[$segment = array_shift($path)] ?? null;
+                $entry = $attribute[$segment = array_shift($path)] ?? null;
                 if (!$entry) {
 
                 }
                 while (($key = array_shift($path)) !== null) {
                     $entry = $entry[$key];
                 }
-            } else $entry = $config[$path];
-            
+            } else $entry = $attribute[$path];
+
             return [$parameter->getName(), $entry];
         }
 
-        $container = $this->getAttribute($parameter, Container::class);
+        $attribute = $this->getAttribute($parameter, Container::class);
 
-        if ($container) {
-            return $this->resolveFromContainer($parameter, $container->newInstance()->id);
+        if ($attribute) {
+            return [$parameter->getName(), $this->container->get($attribute->newInstance()->id)];
         }
 
         /*
@@ -86,7 +86,7 @@ final class ContainerResolver implements ParameterResolverInterface
     {
         return $parameter->getAttributes($cls)[0] ?? null;
     }
-    
+
     public static function createFromContainer(ContainerInterface $container): ContainerResolver
     {
         return new self($container);
