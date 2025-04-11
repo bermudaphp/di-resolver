@@ -31,7 +31,7 @@ final class ContainerResolver implements ParameterResolverInterface
 
             try {
                 $config = $this->container->get($configInstance->configKey);
-            } catch (ContainerExceptionInterface $prev) {
+            } catch (ContainerExceptionInterface) {
                 return null;
             }
 
@@ -73,7 +73,7 @@ final class ContainerResolver implements ParameterResolverInterface
             named:
             if ($this->container->has($type->getName())) {
                 try {
-                    $entry = $this->container->get($id);
+                    $entry = $this->container->get($type->getName());
                 } catch (ContainerExceptionInterface $e) {
                     return null;
                 }
@@ -98,7 +98,7 @@ final class ContainerResolver implements ParameterResolverInterface
                 return false;
             }
         }
-        
+
         return true;
     }
 
