@@ -45,7 +45,7 @@ final class ContainerResolver implements ParameterResolverInterface
                 }
             } else $entry = $config[$path];
 
-            $this->checkParamType($parameter, $entry);
+            if (!$this->checkParamType($parameter, $entry)) return null;
 
             return [$parameter->getName(), $entry];
         }
