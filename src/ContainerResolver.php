@@ -56,9 +56,10 @@ final class ContainerResolver implements ParameterResolverInterface
             return $this->resolveFromContainer($parameter, $container->newInstance()->id);
         }
 
+        /*
         if ($this->container->has($parameter->getName())) {
             return $this->resolveFromContainer($parameter, $parameter->getName());
-        }
+        }*/
 
         $type = $parameter->getType();
 
@@ -70,7 +71,17 @@ final class ContainerResolver implements ParameterResolverInterface
 
         if ($type instanceof \ReflectionNamedType) {
             named:
-            if ($this->container->has($type->getName())) return $this->resolveFromContainer($parameter, $type->getName());
+            if ($this->container->has($type->getName())) {
+                try {
+                    $entry = $this->container->get($id);
+                } catch (ContainerExceptionInterface $e) {
+                    throw ResolverException::createFromPrev($e);
+                }
+
+                $this->checkParamType($parameter, $entry);
+
+                return [$parameter->getName(), $entry];
+            }
         }
 
         return null;
@@ -90,20 +101,7 @@ final class ContainerResolver implements ParameterResolverInterface
             }
         }
     }
-
-    private function resolveFromContainer(ReflectionParameter $parameter, string $id): array
-    {
-        try {
-            $entry = $this->container->get($id);
-        } catch (ContainerExceptionInterface $e) {
-            throw ResolverException::createFromPrev($e);
-        }
-
-        $this->checkParamType($parameter, $entry);
-
-        return [$parameter->getName(), $entry];
-    }
-
+    
     public static function createFromContainer(ContainerInterface $container): ContainerResolver
     {
         return new self($container);
