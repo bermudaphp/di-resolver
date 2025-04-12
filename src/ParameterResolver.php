@@ -5,8 +5,6 @@ namespace Bermuda\ParameterResolver;
 use ReflectionParameter;
 use Psr\Container\ContainerInterface;
 
-use function Bermuda\Config\conf;
-
 final class ParameterResolver
 {
     private(set) ResolverCollector $resolvers;
