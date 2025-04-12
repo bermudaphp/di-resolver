@@ -60,21 +60,20 @@ final class ParameterResolver
      */
     public function resolveParameter(ReflectionParameter $parameter, array $params = []): array
     {
+        if (isset($params[$name = $parameter->getName()]) || array_key_exists($name, $params)) {
+            return [$name, $params[$name]];
+        }
+
         foreach ($this->resolvers->getIterator() as $resolver) {
-            if (isset($params[$parameter->getName()])) return [$parameter->getName(), $params[$parameter->getName()]];
             $pair = $resolver->resolve($parameter, $params);
             if ($pair) return $pair;
         }
 
-        if (array_key_exists($parameter->getName(), $params)) {
-            return [$parameter->getName(), $params[$parameter->getName()]];
-        }
-
         if ($parameter->isDefaultValueAvailable()) {
-            return [$parameter->getName(), $parameter->getDefaultValue()];
+            return [$name, $parameter->getDefaultValue()];
         }
 
-        if ($parameter->allowsNull()) return [$parameter->getName(), null];
+        if ($parameter->allowsNull()) return [$name, null];
 
         throw ResolverException::createFromParameter($parameter);
     }
