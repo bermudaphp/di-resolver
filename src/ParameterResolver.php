@@ -46,12 +46,7 @@ final class ParameterResolver
         $resolved = [];
         foreach ($parameters as $parameter) {
             $pair = $this->resolveParameter($parameter, $params);
-            try {
-                if ($pair) $resolved[$parameter->getPosition()] = $pair[1];
-            } catch (\Throwable $e) {
-                dd($pair, $parameters, $this->resolvers);
-            }
-
+            if ($pair) $resolved[$parameter->getPosition()] = $pair[1];
         }
 
         return $resolved;
@@ -68,6 +63,7 @@ final class ParameterResolver
     public function resolveParameter(ReflectionParameter $parameter, array $params = []): array
     {
         foreach ($this->resolvers->getIterator() as $resolver) {
+            if (isset($params[$parameter->getName()])) return [$parameter->getName(), $params[$parameter->getName()]];
             $pair = $resolver->resolve($parameter, $params);
             if ($pair) return $pair;
         }
