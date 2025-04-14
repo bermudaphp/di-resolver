@@ -16,7 +16,7 @@ final class ContainerResolver implements ParameterResolverInterface
 
     public function resolve(ReflectionParameter $parameter, array $params = []): ?array
     {
-        if ($entry = $this->resolveFromConfig($parameter)) {
+        if ($entry = $this->resolveFromConfigAttribute($parameter)) {
             return [$parameter->getName(), $entry];
         }
 
@@ -55,7 +55,7 @@ final class ContainerResolver implements ParameterResolverInterface
         return null;
     }
 
-    private function resolveFromConfig(ReflectionParameter $parameter): mixed
+    private function resolveFromConfigAttribute(ReflectionParameter $parameter): mixed
     {
         $config = $parameter->getAttributes(Config::class)[0] ?? null;
         if (!$config) return null;
