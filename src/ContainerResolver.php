@@ -29,8 +29,8 @@ final class ContainerResolver implements ParameterResolverInterface
 
     private function resolveFromContainerAttribute(ReflectionParameter $parameter): mixed
     {
-        $attribute = $this->getAttribute($parameter, Container::class);
-        return $attribute ? $this->container->get($attribute->newInstance()->id) : null;
+        return ($container = $parameter->getAttributes(Container::class)[0] ?? null)
+            ? $this->container->get($container->newInstance()->id) : null;
     }
 
     private function resolveFromType(ReflectionParameter $parameter): ?array
@@ -54,10 +54,10 @@ final class ContainerResolver implements ParameterResolverInterface
 
         return null;
     }
-    
+
     private function resolveFromConfig(ReflectionParameter $parameter): mixed
     {
-        $config = $this->getAttribute($parameter, Config::class);
+        $config = $parameter->getAttributes(Config::class)[0] ?? null;
         if (!$config) return null;
 
         /**
@@ -67,29 +67,23 @@ final class ContainerResolver implements ParameterResolverInterface
         $entry = $this->container->get(Config::$key);
         $path = $config->explodeDots ? explode('.', $config->path) : [$config->path];
 
-        $keysTraversed = [];
-
-        foreach ($path as $key) {
-            $keysTraversed[] = $key;
-
-            if (is_array($entry) || $entry instanceof \ArrayAccess) {
-                if (!isset($entry[$key])) {
-                    $pathString = implode(' → ', $keysTraversed);
-                    throw new ResolverException("Undefined config key: $pathString");
-                }
+        foreach ($path as $i => $key) {
+            try {
                 $entry = $entry[$key];
-            } else {
-                $pathString = implode(' → ', $keysTraversed);
-                throw new ResolverException("Config value at path '$pathString' is not accessible");
+            } catch (\Throwable) {
+                if (is_array($entry) || $entry instanceof \ArrayAccess) {
+                    $pathString = implode(' → ', array_slice($path, 0, $i+1));
+                    throw new ResolverException("Undefined config key: $pathString");
+                } else {
+                    $pathString = implode(' → ', array_slice($path, 0, $i));
+                    throw new ResolverException("Config value at path '$pathString' is not accessible");
+                }
             }
+
+            $keysTraversed[] = $key;
         }
 
         return $entry;
-    }
-
-    private function getAttribute(ReflectionParameter $parameter, string $cls):? \ReflectionAttribute
-    {
-        return $parameter->getAttributes($cls)[0] ?? null;
     }
 
     public static function createFromContainer(ContainerInterface $container): ContainerResolver
