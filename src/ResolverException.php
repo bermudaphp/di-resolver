@@ -14,7 +14,14 @@ class ResolverException extends \RuntimeException
 
     public static function createFromParameter(ReflectionParameter $parameter): ResolverException
     {
-        $self = new self('Can\'t resolve parameter: $' . $parameter->getName());
+        $msg = sprintf('Can\'t resolve parameter: #%s ($%s) for %s::%s()',
+            $parameter->getPosition() + 1,
+            $parameter->getName(),
+            $parameter->getDeclaringClass()->getName(),
+            $parameter->getDeclaringFunction()->getName()
+        );
+        
+        $self = new self($msg);
         $self->line = $parameter->getDeclaringFunction()->getStartLine();
         $self->file = $parameter->getDeclaringFunction()->getFileName();
 
