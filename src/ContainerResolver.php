@@ -36,19 +36,25 @@ final class ContainerResolver implements ParameterResolverInterface
     private function resolveFromType(ReflectionParameter $parameter): ?array
     {
         $type = $parameter->getType();
-        $namedTypes = ($type instanceof \ReflectionUnionType)
-            ? array_filter($type->getTypes(), fn($t) => $t instanceof \ReflectionNamedType)
-            : [$type];
 
-        foreach ($namedTypes as $namedType) {
-            if ($this->container->has($namedType->getName())) {
-                return [$parameter->getName(), $this->container->get($namedType->getName())];
+        if ($type instanceof \ReflectionNamedType) {
+            if ($this->container->has($type->getName())) {
+                return [$parameter->getName(), $this->container->get($type->getName())];
+            }
+            return null;
+        }
+
+        if ($type instanceof \ReflectionUnionType) {
+            foreach ($type->getTypes() as $namedType) {
+                if ($namedType instanceof \ReflectionNamedType && $this->container->has($namedType->getName())) {
+                    return [$parameter->getName(), $this->container->get($namedType->getName())];
+                }
             }
         }
 
         return null;
     }
-
+    
     private function resolveFromConfig(ReflectionParameter $parameter): mixed
     {
         $config = $this->getAttribute($parameter, Config::class);
