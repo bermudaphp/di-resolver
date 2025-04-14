@@ -2,8 +2,8 @@
 
 namespace Bermuda\ParameterResolver;
 
-use Bermuda\CheckType\Type;
 use ReflectionParameter;
+use Bermuda\CheckType\Type;
 
 class ResolverException extends \RuntimeException
 {
@@ -20,7 +20,7 @@ class ResolverException extends \RuntimeException
             $parameter->getDeclaringClass()->getName(),
             $parameter->getDeclaringFunction()->getName()
         );
-        
+
         $self = new self($msg);
         $self->line = $parameter->getDeclaringFunction()->getStartLine();
         $self->file = $parameter->getDeclaringFunction()->getFileName();
