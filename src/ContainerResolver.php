@@ -3,11 +3,9 @@
 namespace Bermuda\ParameterResolver;
 
 use ReflectionParameter;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Bermuda\Di\Attribute\Config;
 use Bermuda\Di\Attribute\Container;
+use Psr\Container\ContainerInterface;
 
 final class ContainerResolver implements ParameterResolverInterface
 {
@@ -16,70 +14,71 @@ final class ContainerResolver implements ParameterResolverInterface
     ) {
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function resolve(ReflectionParameter $parameter, array $params = []):? array
+    public function resolve(ReflectionParameter $parameter, array $params = []): ?array
     {
-        $attribute = $this->getAttribute($parameter, Config::class);
-
-        if ($attribute) {
-            $configInstance = $attribute->newInstance();
-
-            $path = $configInstance->path;
-
-            try {
-                $attribute = $this->container->get($configInstance->configKey);
-            } catch (ContainerExceptionInterface) {
-                return null;
-            }
-
-            if (is_array($path)) {
-                $entry = $attribute[$segment = array_shift($path)] ?? null;
-                if (!$entry) {
-
-                }
-                while (($key = array_shift($path)) !== null) {
-                    $entry = $entry[$key];
-                }
-            } else $entry = $attribute[$path];
-
+        if ($entry = $this->resolveFromConfig($parameter)) {
             return [$parameter->getName(), $entry];
         }
 
+        if ($entry = $this->resolveFromContainerAttribute($parameter)) {
+            return [$parameter->getName(), $entry];
+        }
+
+        return $this->resolveFromType($parameter);
+    }
+
+    private function resolveFromContainerAttribute(ReflectionParameter $parameter): mixed
+    {
         $attribute = $this->getAttribute($parameter, Container::class);
+        return $attribute ? $this->container->get($attribute->newInstance()->id) : null;
+    }
 
-        if ($attribute) {
-            return [$parameter->getName(), $this->container->get($attribute->newInstance()->id)];
-        }
-
-        /*
-        if ($this->container->has($parameter->getName())) {
-            return $this->resolveFromContainer($parameter, $parameter->getName());
-        }*/
-
+    private function resolveFromType(ReflectionParameter $parameter): ?array
+    {
         $type = $parameter->getType();
+        $namedTypes = ($type instanceof \ReflectionUnionType)
+            ? array_filter($type->getTypes(), fn($t) => $t instanceof \ReflectionNamedType)
+            : [$type];
 
-        if ($type instanceof \ReflectionUnionType) {
-            foreach ($type->getTypes() as $type) {
-                if ($type instanceof \ReflectionNamedType) goto named;
-            }
-        }
-
-        if ($type instanceof \ReflectionNamedType) {
-            named:
-            if ($this->container->has($type->getName())) {
-                try {
-                    $entry = $this->container->get($type->getName());
-                } catch (ContainerExceptionInterface $e) {
-                    return null;
-                }
-
-                return [$parameter->getName(), $entry];
+        foreach ($namedTypes as $namedType) {
+            if ($this->container->has($namedType->getName())) {
+                return [$parameter->getName(), $this->container->get($namedType->getName())];
             }
         }
 
         return null;
+    }
+
+    private function resolveFromConfig(ReflectionParameter $parameter): mixed
+    {
+        $config = $this->getAttribute($parameter, Config::class);
+        if (!$config) return null;
+
+        /**
+         * @var Config $config
+         */
+        $config = $config->newInstance();
+        $entry = $this->container->get(Config::$key);
+        $path = $config->explodeDots ? explode('.', $config->path) : [$config->path];
+
+        $keysTraversed = [];
+
+        foreach ($path as $key) {
+            $keysTraversed[] = $key;
+
+            if (is_array($entry) || $entry instanceof \ArrayAccess) {
+                if (!isset($entry[$key])) {
+                    $pathString = implode(' → ', $keysTraversed);
+                    throw new ResolverException("Undefined config key: $pathString");
+                }
+                $entry = $entry[$key];
+            } else {
+                $pathString = implode(' → ', $keysTraversed);
+                throw new ResolverException("Config value at path '$pathString' is not accessible");
+            }
+        }
+
+        return $entry;
     }
 
     private function getAttribute(ReflectionParameter $parameter, string $cls):? \ReflectionAttribute
