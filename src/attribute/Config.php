@@ -68,11 +68,11 @@ class Config
      */
     public function getEntryFromConfig(array|\ArrayAccess $config): mixed
     {
-        $path = $this->explodeDots ? explode('.', $config->path) : [$config->path];
+        $path = $this->explodeDots ? explode('.', $this->path) : [$this->path];
 
         foreach ($path as $i => $key) {
             try {
-                $entry = $entry[$key];
+                $entry = $config[$key];
             } catch (\Throwable) {
                 if (is_array($entry) || $entry instanceof \ArrayAccess) {
                     $pathString = implode(' → ', array_slice($path, 0, $i+1));
