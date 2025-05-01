@@ -1,7 +1,8 @@
 <?php
 
-namespace Bermuda\Di\Attribute;
+namespace Bermuda\DI\Attribute;
 
+use Bermuda\ParameterResolver\ParameterResolutionException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -49,4 +50,40 @@ class Config
      * @var string
      */
     public static string $key = 'config';
+
+    /**
+     * Retrieves a nested configuration entry based on the attribute's path.
+     *
+     * The attribute's path (e.g. "database.connections.mysql") is split into an array of keys if explodeDots is true.
+     * This method then traverses the provided configuration array or ArrayAccess instance to retrieve the desired value.
+     *
+     * If a key is missing or a value is not accessible as an array, a descriptive error is thrown. The error messages
+     * include the keys traversed so far, making it clear exactly where the lookup failed.
+     *
+     * @internal
+     * @param array|\ArrayAccess $config The configuration source, typically an array or object implementing ArrayAccess.
+     * @return mixed The resolved configuration entry.
+     *
+     * @throws \OutOfBoundsException if any key in the path is missing or if a non-array value is accessed before reaching the end.
+     */
+    public function getEntryFromConfig(array|\ArrayAccess $config): mixed
+    {
+        $path = $this->explodeDots ? explode('.', $config->path) : [$config->path];
+
+        foreach ($path as $i => $key) {
+            try {
+                $entry = $entry[$key];
+            } catch (\Throwable) {
+                if (is_array($entry) || $entry instanceof \ArrayAccess) {
+                    $pathString = implode(' → ', array_slice($path, 0, $i+1));
+                    throw new \OutOfBoundsException("Undefined config key: $pathString");
+                } else {
+                    $pathString = implode(' → ', array_slice($path, 0, $i));
+                    throw new \OutOfBoundsException("Config value at path '$pathString' is not accessible");
+                }
+            }
+        }
+
+        return $entry;
+    }
 }
