@@ -1,17 +1,14 @@
 <?php
 
-namespace Bermuda\ParameterResolver;
+namespace Bermuda\DI\Parameter;
 
 class ConfigProvider extends \Bermuda\Config\ConfigProvider
 {
-    public const string CONFIG_KEY_RESOLVERS = 'Bermuda\ParameterResolver:resolvers';
-
     protected function getFactories(): array
     {
         return [
-            ParameterResolver::class => [ParameterResolver::class, 'createFromContainer'],
+            ParameterResolver::class => [ParameterResolver::class, 'createDefaults'],
             ContainerResolver::class => [ContainerResolver::class, 'createFromContainer'],
-            ResolverCollector::class => [ResolverCollector::class, 'createFromContainer'],
         ];
     }
 }
