@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\ParameterResolver;
+namespace Bermuda\DI\Parameter\ParameterResolver;
 
 use Reflection\Reflection;
 use ReflectionParameter;
