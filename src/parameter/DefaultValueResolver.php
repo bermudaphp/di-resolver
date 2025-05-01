@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\ParameterResolver;
+namespace Bermuda\DI\Parameter;
 
 /**
  * DefaultValueResolver is responsible for resolving the default value of a parameter.
