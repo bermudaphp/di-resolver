@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\Di\Attribute;
+namespace Bermuda\DI\Attribute;
 
 /**
  * The Inject attribute is used to mark parameters or properties for dependency injection.
