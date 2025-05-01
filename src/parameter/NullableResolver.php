@@ -1,6 +1,6 @@
 <?php
 
-namespace Bermuda\ParameterResolver;
+namespace Bermuda\DI\Parameter;
 
 /**
  * NullableResolver is a parameter resolver that handles parameters which allow null values.
