@@ -3,8 +3,9 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Bermuda\\ParameterResolver\\": "src/",
-      "Bermuda\\Di\\Attribute\\": "src/attribute/"
+      "Bermuda\\DI\\": "src/",
+      "Bermuda\\DI\\Attribute\\": "src/attribute/",
+      "Bermuda\\DI\\Parameter\\": "src/parameter"
     }
   },
   "require": {
