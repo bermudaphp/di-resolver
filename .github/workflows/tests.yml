@@ -1,0 +1,96 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        php: ['8.4']
+        
+    name: PHP ${{ matrix.php }} on ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        extensions: mbstring, intl
+        coverage: none
+        tools: composer:v2
+        
+    - name: Get composer cache directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      shell: bash
+      
+    - name: Cache composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+        
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+      
+    - name: Run tests
+      run: composer test
+
+  tests-lowest-deps:
+    runs-on: ubuntu-latest
+    name: Tests with lowest dependencies
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: mbstring, intl
+        coverage: none
+        tools: composer:v2
+        
+    - name: Install lowest dependencies
+      run: composer update --prefer-lowest --prefer-stable --prefer-dist --no-interaction --no-progress
+      
+    - name: Run tests
+      run: composer test
+
+  tests-no-optional-deps:
+    runs-on: ubuntu-latest
+    name: Tests without optional dependencies
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: mbstring, intl
+        coverage: none
+        tools: composer:v2
+        
+    - name: Install dependencies without dev packages
+      run: composer install --prefer-dist --no-progress --no-suggest --no-interaction --no-dev
+      
+    - name: Install PHPUnit separately
+      run: composer require --dev phpunit/phpunit
+      
+    - name: Run tests
+      run: ./vendor/bin/phpunit
