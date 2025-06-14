@@ -2,31 +2,49 @@
 
 namespace Bermuda\DI\Attribute;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+
 /**
- * The Inject attribute is used to mark parameters or properties for dependency injection.
- *
- * When applied, this attribute signals that the annotated element should be automatically
- * populated with a dependency from a container. If an identifier (id) is provided, the container
- * will use it to locate the dependency; otherwise, the container may fall back to the type hint
- * of the parameter or property.
- *
- * Example usage:
- *
- * // Injects the service with the given service id.
- * public function __construct(#[Inject("service.id")] ServiceInterface $service) { ... }
- *
- * // If no id is provided, the container might use the type to resolve the dependency.
- * #[Inject]
- * private LoggerInterface $logger;
+ * Attribute for dependency injection resolution.
+ * 
+ * Used to mark parameters or properties that should be resolved from a DI container.
+ * When applied to a parameter, the resolver will attempt to fetch the service 
+ * from the container using the specified ID or the parameter's type if no ID is provided.
+ * 
+ * @example Basic usage with explicit service ID:
+ * ```php
+ * function processUser(#[Inject('user.repository')] UserRepository $repo) {
+ *     // $repo will be resolved from container using 'user.repository' ID
+ * }
+ * ```
+ * 
+ * @example Usage without ID (resolves by parameter type):
+ * ```php
+ * function processUser(#[Inject] UserRepository $repo) {
+ *     // $repo will be resolved from container using 'UserRepository' as ID
+ * }
+ * ```
+ * 
+ * @example Property injection:
+ * ```php
+ * class UserService {
+ *     #[Inject('logger.service')]
+ *     private LoggerInterface $logger;
+ * }
+ * ```
  */
-#[\Attribute(\Attribute::TARGET_PARAMETER | \Attribute::TARGET_PROPERTY)]
+#[\Attribute(\Attribute::TARGET_PARAMETER|\Attribute::TARGET_PROPERTY)]
 class Inject
 {
     /**
-     * Constructor.
-     *
-     * @param string|null $id An optional service identifier to be used for dependency resolution.
-     *                        If null, the container may use the parameter or property type as the service id.
+     * Creates a new Inject attribute instance.
+     * 
+     * @param string|null $id The service identifier in the DI container.
+     *                        If null, the parameter's type will be used as the service ID.
+     *                        For example, if $id is null and parameter type is UserRepository,
+     *                        the resolver will try to get 'UserRepository' from the container.
      */
     public function __construct(
         public readonly ?string $id = null,
