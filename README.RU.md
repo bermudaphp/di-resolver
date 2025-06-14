@@ -280,14 +280,6 @@ try {
 ## Требования
 
 - PHP 8.4 или выше
-- PSR-11 Container Interface (для ContainerResolver)
-- Bermuda DI Attributes (для атрибутов Config/Inject)
-
-## Тестирование
-
-```bash
-composer test
-```
 
 ## Лицензия
 
