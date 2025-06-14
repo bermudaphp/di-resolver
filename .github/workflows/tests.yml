@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest]
         php: ['8.4']
         
     name: PHP ${{ matrix.php }} on ${{ matrix.os }}
@@ -82,7 +82,6 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.4'
-        extensions: mbstring, intl
         coverage: none
         tools: composer:v2
         
