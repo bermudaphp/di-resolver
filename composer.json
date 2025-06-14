@@ -1,17 +1,45 @@
 {
-  "name": "bermudaphp/di-resolver",
-  "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Bermuda\\DI\\": "src/",
-      "Bermuda\\DI\\Attribute\\": "src/attribute/",
-      "Bermuda\\DI\\Parameter\\": "src/parameter"
-    }
-  },
-  "require": {
-    "php": "^8.4",
-    "bermudaphp/config": "^1.4",
-    "bermudaphp/checktype": "^1.0.2",
-    "psr/container": "^1.0 || 2.0.2"
-  }
+    "name": "bermudaphp/di-resolver",
+    "description": "A powerful and flexible parameter resolution library for PHP that automatically resolves function and method parameters from various sources",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "dependency-injection",
+        "parameter-resolution",
+        "di",
+        "reflection",
+        "config",
+        "attributes",
+        "psr-11"
+    ],
+    "require": {
+        "php": "^8.4",
+        "psr/container": "^2.0",
+        "bermudaphp/config": "^2.0",
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bermuda\\ParameterResolver\\": "src/",
+            "Bermuda\\DI\\Attribute\\": "src/attribute/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bermuda\\ParameterResolver\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
