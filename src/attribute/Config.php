@@ -2,10 +2,10 @@
 
 namespace Bermuda\DI\Attribute;
 
-use Bermuda\ParameterResolver\ParameterResolutionException;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Bermuda\ParameterResolver\ParameterResolutionException;
 
 /**
  * The Config attribute is used to inject configuration values into parameters or properties.
@@ -71,19 +71,20 @@ class Config
     public function getEntryFromConfig(array|\ArrayAccess $config): mixed
     {
         $path = $this->explodeDots ? explode('.', $this->path) : [$this->path];
+        $entry = $config;
 
         foreach ($path as $i => $key) {
-            try {
-                $entry = $config[$key];
-            } catch (\Throwable) {
-                if (is_array($entry) || $entry instanceof \ArrayAccess) {
-                    $pathString = implode(' → ', array_slice($path, 0, $i + 1));
-                    throw new \OutOfBoundsException("Undefined configuration key: $pathString");
-                } else {
-                    $pathString = implode(' → ', array_slice($path, 0, $i));
-                    throw new \InvalidArgumentException("The configuration value at path '$pathString' is not accessible");
-                }
+            if (!is_array($entry) && !$entry instanceof \ArrayAccess) {
+                $pathString = implode(' → ', array_slice($path, 0, $i));
+                throw new \InvalidArgumentException("The configuration value at path '$pathString' is not accessible");
             }
+
+            if (!isset($entry[$key]) && !array_key_exists($key, $entry)) {
+                $pathString = implode(' → ', array_slice($path, 0, $i + 1));
+                throw new \OutOfBoundsException("Undefined configuration key: $pathString");
+            }
+
+            $entry = $entry[$key];
         }
 
         return $entry;
