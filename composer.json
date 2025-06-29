@@ -6,6 +6,7 @@
     "keywords": [
         "dependency-injection",
         "parameter-resolution",
+        "parameter-resolver"
         "di",
         "reflection",
         "config",
