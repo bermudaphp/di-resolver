@@ -41,14 +41,6 @@ final class ParameterResolverTest extends TestCase
         $this->resolver = new ParameterResolver([$this->mockResolver1, $this->mockResolver2]);
     }
 
-    // ================================
-    // UNIT TESTS WITH MOCKS
-    // ================================
-
-    // ================================
-    // COMPREHENSIVE INTEGRATION TESTS
-    // ================================
-
     #[Test]
     #[TestDox('Should create empty resolver when no resolvers provided')]
     public function createsEmptyResolverWhenNoResolversProvided(): void
@@ -120,7 +112,6 @@ final class ParameterResolverTest extends TestCase
         $this->assertTrue($parameterResolver->hasResolver($resolver1));
         $this->assertTrue($parameterResolver->hasResolver($resolver2));
 
-        // Создаем новый резолвер, которого точно нет в коллекции
         $nonExistentResolver = new class implements ParameterResolverInterface {
             public function resolve(\ReflectionParameter $parameter, array $providedParameters = [], array $resolvedParameters = []): ?array {
                 return null;
@@ -221,10 +212,6 @@ final class ParameterResolverTest extends TestCase
         $this->assertInstanceOf(DefaultValueResolver::class, $resolvers[3]);
         $this->assertInstanceOf(NullableResolver::class, $resolvers[4]);
     }
-
-    // ================================
-    // INTEGRATION TESTS WITH REAL RESOLVERS
-    // ================================
 
     #[Test]
     #[TestDox('ArrayResolver should resolve by parameter name')]
@@ -372,7 +359,6 @@ final class ParameterResolverTest extends TestCase
         );
         $parameters = $function->getParameters();
 
-        // ОЖИДАНИЕ: параметр с Inject без ID и без типа не может быть разрешен
         $this->expectException(ParameterResolutionException::class);
         $resolver->resolve($parameters);
     }
@@ -409,7 +395,6 @@ final class ParameterResolverTest extends TestCase
         $function = new ReflectionFunction(function(string $value) {});
         $parameters = $function->getParameters();
 
-        // ОЖИДАНИЕ: ContainerResolver НЕ МОЖЕТ разрешить builtin типы
         $this->expectException(ParameterResolutionException::class);
         $resolver->resolve($parameters);
     }
@@ -439,7 +424,6 @@ final class ParameterResolverTest extends TestCase
         $function = new ReflectionFunction(function($untyped) {}); // Без типа
         $parameters = $function->getParameters();
 
-        // ОЖИДАНИЕ: параметр без типа НЕ МОЖЕТ быть разрешен ContainerResolver
         $this->expectException(ParameterResolutionException::class);
         $resolver->resolve($parameters);
     }
@@ -451,7 +435,6 @@ final class ParameterResolverTest extends TestCase
         // Тестируем ТОЛЬКО ContainerResolver без fallback resolvers
         $resolver = new ParameterResolver([new ContainerResolver($this->mockContainer)]);
 
-        // Case 1: Успешное разрешение
         $service = new stdClass();
         $this->mockContainer->method('has')->with('stdClass')->willReturn(true);
         $this->mockContainer->method('get')->with('stdClass')->willReturn($service);
@@ -460,7 +443,6 @@ final class ParameterResolverTest extends TestCase
         $result = $resolver->resolve($function->getParameters());
         $this->assertSame($service, $result[0]);
 
-        // Case 2: Неуспешное разрешение (сервис не найден)
         $this->mockContainer = $this->createMock(ContainerInterface::class);
         $this->mockContainer->method('has')->with('stdClass')->willReturn(false);
         $resolver = new ParameterResolver([new ContainerResolver($this->mockContainer)]);
@@ -473,17 +455,16 @@ final class ParameterResolverTest extends TestCase
     #[TestDox('Should demonstrate proper resolver chain behavior')]
     public function demonstratesProperResolverChainBehavior(): void
     {
-        // Упрощенная версия теста для избежания конфликтов моков
         $resolver = new ParameterResolver([
-            new ArrayResolver(),           // 1-й приоритет: явные параметры
-            new DefaultValueResolver(),    // 2-й приоритет: default значения
-            new NullableResolver()         // 3-й приоритет: nullable → null
+            new ArrayResolver(),           
+            new DefaultValueResolver(),    
+            new NullableResolver()        
         ]);
 
         $function = new ReflectionFunction(function(
-            string $explicit,           // Будет разрешен ArrayResolver
-            string $withDefault = 'def', // Будет разрешен DefaultValueResolver
-            ?int $nullable = null       // Будет разрешен NullableResolver
+            string $explicit,           
+            string $withDefault = 'def', 
+            ?int $nullable = null      
         ) {});
 
         $providedParameters = [
@@ -502,7 +483,6 @@ final class ParameterResolverTest extends TestCase
     {
         $resolver = ParameterResolver::createDefaults($this->mockContainer);
 
-        // Setup container for type resolution
         $service = new stdClass();
         $this->mockContainer->method('has')->willReturn(true);
         $this->mockContainer->method('get')->willReturn($service);
@@ -515,19 +495,17 @@ final class ParameterResolverTest extends TestCase
 
         $result = $resolver->resolve($parameters, $providedParameters);
 
-        // Verify each parameter is resolved correctly
-        $this->assertEquals('explicit_value', $result[0]); // ArrayResolver
-        $this->assertSame($service, $result[1]); // ArrayTypedResolver
-        $this->assertSame($service, $result[2]); // ContainerResolver
-        $this->assertEquals('default_value', $result[3]); // DefaultValueResolver
-        $this->assertNull($result[4]); // NullableResolver
+        $this->assertEquals('explicit_value', $result[0]);
+        $this->assertSame($service, $result[1]);
+        $this->assertSame($service, $result[2]); 
+        $this->assertEquals('default_value', $result[3]);
+        $this->assertNull($result[4]);
     }
 
     #[Test]
     #[TestDox('Should respect resolver order and use first successful match')]
     public function respectsResolverOrderAndUsesFirstSuccessfulMatch(): void
     {
-        // Create resolver with ArrayResolver before ArrayTypedResolver
         $resolver = new ParameterResolver([
             new ArrayResolver(),
             new ArrayTypedResolver()
@@ -537,13 +515,11 @@ final class ParameterResolverTest extends TestCase
         $parameters = $function->getParameters();
         $service = new stdClass();
         $providedParameters = [
-            'ambiguous' => 'name_match', // Should match by name first
+            'ambiguous' => 'name_match',
             'stdClass' => $service
         ];
 
         $result = $resolver->resolve($parameters, $providedParameters);
-
-        // Should use ArrayResolver result, not ArrayTypedResolver
         $this->assertEquals('name_match', $result[0]);
     }
 
@@ -552,7 +528,7 @@ final class ParameterResolverTest extends TestCase
     public function handlesConfigAttributeWithExplodeDotsDisabled(): void
     {
         $config = [
-            'database.host' => 'literal_key_value' // Key with actual dots
+            'database.host' => 'literal_key_value'
         ];
 
         $this->mockContainer
@@ -575,7 +551,7 @@ final class ParameterResolverTest extends TestCase
     #[TestDox('Should throw exception when Config key not found')]
     public function throwsExceptionWhenConfigKeyNotFound(): void
     {
-        $config = []; // Empty config
+        $config = [];
 
         $this->mockContainer
             ->method('get')
@@ -596,7 +572,6 @@ final class ParameterResolverTest extends TestCase
     #[TestDox('Should resolve parameters with ArrayAccess config')]
     public function resolvesParametersWithArrayAccessConfig(): void
     {
-        // Создаем stdClass вместо анонимного класса
         $config = new class implements \ArrayAccess {
             private array $data = [
                 'app' => ['name' => 'ArrayAccessApp']
@@ -619,7 +594,6 @@ final class ParameterResolverTest extends TestCase
             }
         };
 
-        // Создаем изолированный мок для этого теста
         $containerMock = $this->createMock(ContainerInterface::class);
         $containerMock
             ->method('get')
@@ -647,11 +621,9 @@ final class ParameterResolverTest extends TestCase
             'database' => ['host' => 'localhost']
         ];
 
-        // Используем stdClass вместо анонимного класса
         $userService = new stdClass();
         $userService->name = 'TestUser';
 
-        // Создаем простой мок контейнера для этого теста
         $containerMock = $this->createMock(ContainerInterface::class);
         $containerMock
             ->method('has')
@@ -678,12 +650,12 @@ final class ParameterResolverTest extends TestCase
 
         $result = $resolver->resolve($parameters, $providedParameters);
 
-        $this->assertEquals(42, $result[0]); // explicit parameter
-        $this->assertEquals('TestApp', $result[1]); // config attribute
-        $this->assertSame($customLogger, $result[2]); // inject attribute
-        $this->assertSame($userService, $result[3]); // container by type
-        $this->assertEquals('fallback', $result[4]); // default value
-        $this->assertNull($result[5]); // nullable
+        $this->assertEquals(42, $result[0]);
+        $this->assertEquals('TestApp', $result[1]); 
+        $this->assertSame($customLogger, $result[2]);
+        $this->assertSame($userService, $result[3]); 
+        $this->assertEquals('fallback', $result[4]); 
+        $this->assertNull($result[5]);
     }
 
     #[Test]
@@ -741,8 +713,6 @@ final class ParameterResolverTest extends TestCase
         $providedParameters = ['some_value' => 'test'];
 
         $result = $resolver->resolve($parameters, $providedParameters);
-
-        // Should use default value since string is builtin type
         $this->assertEquals('default', $result[0]);
     }
 
@@ -755,13 +725,10 @@ final class ParameterResolverTest extends TestCase
             new DefaultValueResolver()
         ]);
 
-        // Create parameter without type hint
         $function = new ReflectionFunction(function($untyped = 'fallback') {});
         $parameters = $function->getParameters();
 
         $result = $resolver->resolve($parameters, []);
-
-        // Should use default value
         $this->assertEquals('fallback', $result[0]);
     }
 
@@ -769,7 +736,6 @@ final class ParameterResolverTest extends TestCase
     #[TestDox('Should handle complex dependency injection scenario')]
     public function handlesComplexDependencyInjectionScenario(): void
     {
-        // Setup a realistic DI scenario
         $configData = [
             'database' => [
                 'default' => 'mysql',
@@ -788,14 +754,12 @@ final class ParameterResolverTest extends TestCase
             ]
         ];
 
-        // Используем stdClass вместо анонимных классов
         $userRepository = new stdClass();
         $userRepository->users = ['user1', 'user2'];
 
         $logger = new stdClass();
         $logger->logs = [];
 
-        // Создаем изолированный мок для этого теста
         $containerMock = $this->createMock(ContainerInterface::class);
         $containerMock
             ->method('has')
@@ -814,8 +778,6 @@ final class ParameterResolverTest extends TestCase
             ]);
 
         $resolver = ParameterResolver::createDefaults($containerMock);
-
-        // Create a complex service class constructor
         $function = new ReflectionFunction(function(
             #[Config('database.connections.mysql.host')] string $dbHost,
             #[Config('app.name')] string $appName,
@@ -829,17 +791,13 @@ final class ParameterResolverTest extends TestCase
         $providedParameters = ['debug' => true];
         $result = $resolver->resolve($parameters, $providedParameters);
 
-        $this->assertEquals('localhost', $result[0]); // Config resolution
-        $this->assertEquals('TestApplication', $result[1]); // Config resolution
-        $this->assertSame($logger, $result[2]); // Inject attribute
-        $this->assertSame($userRepository, $result[3]); // Type resolution
-        $this->assertNull($result[4]); // Nullable parameter
-        $this->assertTrue($result[5]); // Provided parameter
+        $this->assertEquals('localhost', $result[0]);
+        $this->assertEquals('TestApplication', $result[1]);
+        $this->assertSame($logger, $result[2]);
+        $this->assertSame($userRepository, $result[3]);
+        $this->assertNull($result[4]);
+        $this->assertTrue($result[5]);
     }
-
-    // ================================
-    // ERROR HANDLING TESTS
-    // ================================
 
     #[Test]
     #[TestDox('Should throw exception with proper context when resolution fails')]
@@ -915,11 +873,9 @@ final class ParameterResolverTest extends TestCase
     #[TestDox('Should handle type mismatch validation gracefully')]
     public function handlesTypeMismatchValidationGracefully(): void
     {
-        // Create a resolver that returns wrong type (this should be caught by reflection validation)
         $badResolver = new class implements ParameterResolverInterface {
             public function resolve(\ReflectionParameter $parameter, array $providedParameters = [], array $resolvedParameters = []): ?array
             {
-                // Return string for int parameter - this should cause a type validation error
                 return [$parameter->getPosition(), 'not_an_int'];
             }
         };
@@ -933,10 +889,6 @@ final class ParameterResolverTest extends TestCase
 
         $resolver->resolve($parameters);
     }
-
-    // ================================
-    // HELPER METHODS
-    // ================================
 
     private function createTestParameter(string $name = 'testParam', int $position = 0): ReflectionParameter
     {
@@ -1008,7 +960,7 @@ final class ParameterResolverTest extends TestCase
             $explicitValue,
             #[Config('app.name')] string $appName,
             #[Inject('custom_logger')] $logger,
-            stdClass $userService, // Используем конкретный тип вместо object
+            stdClass $userService, 
             $fallbackParam = 'fallback',
             ?string $optionalParam = null
         ) {});
@@ -1018,11 +970,11 @@ final class ParameterResolverTest extends TestCase
     private function createComprehensiveTestParameters(): array
     {
         $function = new ReflectionFunction(function(
-            $explicitParam, // Will be resolved by ArrayResolver
-            stdClass $typedParam, // Will be resolved by ArrayTypedResolver
-            stdClass $containerParam, // Will be resolved by ContainerResolver
-            $defaultParam = 'default_value', // Will be resolved by DefaultValueResolver
-            ?string $nullableParam = null // Will be resolved by NullableResolver
+            $explicitParam,
+            stdClass $typedParam,
+            stdClass $containerParam,
+            $defaultParam = 'default_value',
+            ?string $nullableParam = null
         ) {});
         return $function->getParameters();
     }
@@ -1041,11 +993,7 @@ final class ParameterResolverTest extends TestCase
         ) {});
         return $function->getParameters();
     }
-
-    // ================================
-    // DATA PROVIDERS
-    // ================================
-
+    
     public static function resolverOrderProvider(): array
     {
         return [
@@ -1056,8 +1004,8 @@ final class ParameterResolverTest extends TestCase
             ],
             'default_then_array' => [
                 [DefaultValueResolver::class, ArrayResolver::class],
-                [], // No provided parameters, should use default
-                'default_param_value' // Default should win if it comes first
+                [],
+                'default_param_value'
             ]
         ];
     }
@@ -1087,8 +1035,6 @@ final class ParameterResolverTest extends TestCase
     public function handlesPerformanceWithManyParametersEfficiently(): void
     {
         $resolver = new ParameterResolver([new ArrayResolver(), new DefaultValueResolver()]);
-
-        // Create a class with many parameters for testing
         $testClass = new class {
             public function manyParams(
                 $p1 = 'v1', $p2 = 'v2', $p3 = 'v3', $p4 = 'v4', $p5 = 'v5',
@@ -1100,8 +1046,7 @@ final class ParameterResolverTest extends TestCase
 
         $method = new ReflectionMethod($testClass, 'manyParams');
         $parameters = $method->getParameters();
-
-        // Provide values for some parameters
+        
         $providedParameters = [
             'p1' => 'override1',
             'p5' => 'override5',
@@ -1112,14 +1057,12 @@ final class ParameterResolverTest extends TestCase
         $result = $resolver->resolve($parameters, $providedParameters);
         $endTime = microtime(true);
 
-        // Verify all parameters were resolved
         $this->assertCount(20, $result);
         $this->assertEquals('override1', $result[0]);
         $this->assertEquals('v2', $result[1]);
         $this->assertEquals('override5', $result[4]);
         $this->assertEquals('override10', $result[9]);
 
-        // Ensure it completed in reasonable time (less than 0.1 second)
         $this->assertLessThan(0.1, $endTime - $startTime);
     }
 }
