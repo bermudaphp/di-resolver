@@ -2,7 +2,7 @@
 
 namespace Bermuda\ParameterResolver\Tests;
 
-use Bermuda\Di\Attribute\Config;
+use Bermuda\DI\Attribute\Config;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
