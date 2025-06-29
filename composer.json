@@ -16,6 +16,7 @@
     "require": {
         "php": "^8.4",
         "psr/container": "^2.0",
+        "bermudaphp/reflection": "^2.0",
         "bermudaphp/config": "^2.0"
     },
     "require-dev": {
