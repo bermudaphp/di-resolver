@@ -94,7 +94,6 @@ final class ParameterResolverTest extends TestCase
     #[TestDox('Should detect resolver presence by instance')]
     public function detectsResolverPresenceByInstance(): void
     {
-        // Используем анонимные классы с уникальными реализациями
         $resolver1 = new class implements ParameterResolverInterface {
             public function resolve(\ReflectionParameter $parameter, array $providedParameters = [], array $resolvedParameters = []): ?array {
                 return null;
