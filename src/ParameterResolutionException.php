@@ -133,7 +133,7 @@ class ParameterResolutionException extends RuntimeException implements Parameter
             $parameter,
             $providedParameters,
             $resolvedParameters,
-            'Argument #'.$parameter->getPosition().' ($'.$parameter->getName().') must be of type ' . $parameter->getType() . ', given ' . Types::getType($entry, Types::FLAG_OBJECT_AS_CLASS)
+            'Argument #'.$parameter->getPosition().' ($'.$parameter->getName().') must be of type ' . $parameter->getType() . ', given ' . Types::getType($entry, Types::OBJECT_AS_CLASS)
         );
 
         $self->line = $parameter->getDeclaringFunction()->getStartLine();
